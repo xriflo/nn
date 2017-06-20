@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+from pylab import *
 
 import argparse
 import sys
@@ -11,6 +12,9 @@ import tensorflow as tf
 
 FLAGS = None
 
+LEARNING_RATE = 0.04
+NO_EPOCHS = 400
+BATCH_SIZE = 100
 
 def main(_):
   # Import data
@@ -27,21 +31,39 @@ def main(_):
   y_ = tf.placeholder(tf.float32, [None, 10])
 
   # Define loss and optimizer //not working with reduce_sum, why ???
-  loss = tf.reduce_mean(tf.pow(y - y_, 2))
-  train_step = tf.train.GradientDescentOptimizer(0.04).minimize(loss)
+  loss = tf.reduce_mean(tf.square(y - y_))
+  train_step = tf.train.GradientDescentOptimizer(LEARNING_RATE).minimize(loss)
+
+  #accuracy tensors
+  train_acc = []
+  test_acc = []
 
   sess = tf.InteractiveSession()
   tf.global_variables_initializer().run()
-  # Train
-  for _ in range(400):
-    batch_xs, batch_ys = mnist.train.next_batch(100)
-    sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
 
-  # Test trained model
-  correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
-  accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-  print(sess.run(accuracy, feed_dict={x: mnist.test.images,
-                                      y_: mnist.test.labels}))
+
+
+  # Train
+  for i in range(NO_EPOCHS):
+    correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+
+    batch_xs, batch_ys = mnist.train.next_batch(BATCH_SIZE)
+
+    _, acc = sess.run([train_step, accuracy], feed_dict={x: batch_xs, y_: batch_ys})
+    train_acc.append(acc)
+    test_acc.append(sess.run(accuracy, feed_dict={x: mnist.test.images,
+                                                  y_: mnist.test.labels}))
+
+  print("train_acc: ",train_acc[-1],"  test_acc: ",test_acc[-1])
+
+  plot ( arange(1,NO_EPOCHS+1),train_acc,color='g',label='train acc' )
+  plot ( arange(1,NO_EPOCHS+1),test_acc,color='r',label='test acc' )
+  xlabel('No epochs')
+  ylabel('Accuracy')
+  title('Linear - training and testing')
+  legend(('train acc','test acc'))
+  savefig("linear.png")
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
