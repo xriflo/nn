@@ -183,6 +183,10 @@ def main(_):
         optimizers_train_values[opt].append(tr_acc)
         optimizers_test_values[opt].append(ts_acc)
   
+  print(optimizers_train_values)
+  print("------------------------")
+  print(optimizers_test_values)
+
   for opt in range(len(optimizers)):
     plot(arange(0, NO_EPOCHS+1, 200), optimizers_test_values[opt], color=colors[opt], label=optimizers_name[opt])
   xlabel('No epochs')
