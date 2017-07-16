@@ -1,4 +1,6 @@
 lab6-closed_linear_sigmoid/MNIST_data/*
 lab12-vae/MNIST/*
 lab11-char_rnn/simple-examples/*
+lab2-ffn/MNIST/*
+lab13-rbm/MNIST_data/*
 *.png
